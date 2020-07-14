@@ -1,17 +1,22 @@
 from flask import Flask, url_for, render_template, Markup
-import httplib
+import os
 import re
+import requests
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 
 app = Flask(__name__)
-app.config.from_pyfile('application.cfg')
 
-base_url = app.config['BASE_URL']
-base_path = app.config['BASE_PATH']
-channels = app.config['CHANNELS']
-timeout = app.config['TIMEOUT'] if app.config.has_key('TIMEOUT') else 10
+base_url = os.environ['BASE_URL']
+base_path = os.environ['BASE_PATH']
+channels = os.environ['CHANNELS'].split(',')
+timeout = int(os.environ['TIMEOUT']) if 'TIMEOUT' in os.environ else 10
+
+def get(url):
+    r = requests.get(url, timeout=timeout)
+    r.raise_for_status()
+    return r.content.decode('utf-8')
 
 @app.route('/')
 def index():
@@ -26,16 +31,13 @@ def show_channel(channel):
     output = ""
 
     log_path = "/%s/%s/" % (base_path, channel)
-    irc_host = httplib.HTTPConnection(base_url, timeout=timeout)
-    irc_host.request("GET", log_path)
-    resp = irc_host.getresponse()
-    log_index = resp.read()
+    log_index = get(base_url + log_path)
 
-    file_finder = re.compile(r'<a href="([a-z0-9]+-[\d]{4}-[\d]{2}-[\d]{2})"')
+    print(log_index)
+
+    file_finder = re.compile(r'<a href="([\d]{4}-[\d]{2}-[\d]{2}.log)"')
     for match in file_finder.finditer(log_index):
         output += "<a href=\"%s\">%s</a><br />" % (url_for('show_log', channel=channel, log_file=match.group(1)), match.group(1))
-
-    irc_host.close()
 
     page_title = "#%s" % channel
     title = "Channel: %s" % channel
@@ -46,11 +48,7 @@ def show_channel(channel):
 @app.route('/<channel>/<log_file>')
 def show_log(channel, log_file):
     log_path = "/%s/%s/%s" % (base_path, channel, log_file)
-    irc_host = httplib.HTTPConnection(base_url)
-    irc_host.request("GET", log_path)
-    resp = irc_host.getresponse()
-    log_body = resp.read()
-    irc_host.close()
+    log_body = get(base_url + log_path)
 
     body = Markup(highlight(log_body, get_lexer_by_name('irc'), HtmlFormatter()))
     title = "Channel: %s" % channel

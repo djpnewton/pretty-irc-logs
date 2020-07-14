@@ -4,14 +4,13 @@ A simple [Flask](http://flask.pocoo.org/) application that uses [Pygments](http:
 
 ## Setup
 
-Use `easy_install` to install the dependencies:
+Use `pip` to install the dependencies:
 
-    easy_install Flask
-    easy_install Pygments
+    pip install -r requirements.txt
 
 Next, create the config file `application.cfg` with the contents below (adjusted for your environment):
 
-    BASE_URL = "your.irc.server"
+    BASE_URL = "your.log.server"
     BASE_PATH = "your_log_path"
     CHANNELS = ["channel1", "channel2"]
     TIMEOUT = 10
@@ -20,7 +19,8 @@ Run `python log_highlighter` and visit `http://localhost:5000`
 
 ## License
 
-Copyright 2014 Lewis J. Goettner, III
+Copyright 2014 Lewis J. Goettner, III  
+Copyright 2020 Daniel Newton
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
