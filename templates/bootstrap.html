@@ -57,5 +57,63 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/static/js/bootstrap.min.js"></script>
+
+    {% if lead is defined %}
+    <script>
+        var loaded = false;
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for(var i = 0; i <ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return "";
+        }
+
+        function isScrolledIntoView(elem)
+        {
+            var scrollTop = $(window).scrollTop();
+            var scrollBottom = scrollTop + $(window).height();
+            var elemTop = $(elem).offset().top;
+            var elemBottom = elemTop + $(elem).height();
+            return ((elemBottom <= scrollBottom) && (elemTop >= scrollTop));
+        }
+
+        $(window).scroll(function() {
+            $(".cp").each(function(index, element) {
+                if (isScrolledIntoView(element)) {
+                    console.log(element.textContent);
+                    document.cookie = "visibleTimestamp=" + element.textContent + ";SameSite=Strict";
+                    return false;
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            var timestamp = getCookie('visibleTimestamp');
+            console.log("ready: " + timestamp);
+            if (timestamp.length > 0) {
+                $(".cp").each(function(index, element) {
+                    if (element.textContent.startsWith(timestamp)) {
+                        console.log(element.textContent);
+                        element.scrollIntoView();
+                        return false;
+                    }
+                });
+
+            }
+
+            loaded = true;
+        });
+    </script>
+    {% endif %}
   </body>
 </html>
