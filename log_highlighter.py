@@ -33,8 +33,6 @@ def show_channel(channel):
     log_path = "/%s/%s/" % (base_path, channel)
     log_index = get(base_url + log_path)
 
-    print(log_index)
-
     file_finder = re.compile(r'<a href="([\d]{4}-[\d]{2}-[\d]{2}.log)"')
     for match in file_finder.finditer(log_index):
         output += "<a href=\"%s\">%s</a><br />" % (url_for('show_log', channel=channel, log_file=match.group(1)), match.group(1))
